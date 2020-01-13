@@ -1,0 +1,5 @@
+# project specific
+bot.token
+
+# python compiled files
+*.pyc
