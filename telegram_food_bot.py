@@ -13,12 +13,16 @@ def store_clients():
 
 
 def callback_alarm(context):
-    context.bot.send_message(chat_id=context.job.context, text='Hi, This is a callback')
+    context.bot.send_message(chat_id=context.job.context, text='Hi, This is a reminder')
 
 
-def schedule(context, client):
-    context.bot.send_message(chat_id=client, text='A callback has been set!')
-    context.job_queue.run_daily(callback_alarm, context=client, days=(0, 1, 2, 3, 4, 5, 6), time=datetime.now() + timedelta(seconds=5))
+def schedule(context, client_id):
+    context.bot.send_message(chat_id=client_id, text='A reminder has been set')
+    invoke_callback(context.job_queue, client_id)
+
+
+def invoke_callback(job_queue, client_id):
+    job_queue.run_daily(callback_alarm, context=client_id, days=(0, 1, 2, 3, 4, 5, 6), time=datetime.now() + timedelta(seconds=5))
 
 
 def subscribe(bot, context):
@@ -53,8 +57,12 @@ def main():
     dp.add_handler(CommandHandler('echo', sanity_bot.echo))
     dp.add_handler(CommandHandler('sub', subscribe))
     dp.add_handler(CommandHandler('unsub', unsubscribe))
+    list(map(lambda client_id: invoke_callback(updater.job_queue, client_id), clients))
+
     updater.start_polling()
     updater.idle()
 
+
 if __name__ == '__main__':
     main()
+
